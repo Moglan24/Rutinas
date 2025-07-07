@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rutinas de Entrenamiento</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <h1 class="page-title">Rutinas de Entrenamiento</h1>
+
+        
+        <!-- Contenedor de tarjetas -->
+        <div id="rutinas-container" class="cards-container">
+            <!-- Las tarjetas se cargarán aquí -->
+        </div>
+    </div>
+
+    <!-- Modal para agregar ejercicio a músculo existente -->
+    <div id="addExerciseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addExerciseForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="ejercicio-nombre">Nombre del ejercicio:</label>
+                        <input type="text" class="form-control" id="ejercicio-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ejercicio-series">Series:</label>
+                        <input type="number" class="form-control" id="ejercicio-series" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="ejercicio-repeticiones">Repeticiones:</label>
+                        <input type="number" class="form-control" id="ejercicio-repeticiones" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="ejercicio-imagen">Selecciona una imagen:</label>
+                        <input type="file" class="form-control" id="ejercicio-imagen" accept="image/*">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveExercise()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar ejercicio -->
+    <div id="editExerciseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Ejercicio</h5>
+                <button type="button" class="close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editExerciseForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editRutinaIndex">
+                    <input type="hidden" id="editEjercicioIndex">
+                    <div class="form-group">
+                        <label for="editNombre">Nombre del ejercicio:</label>
+                        <input type="text" class="form-control" id="editNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSeries">Series:</label>
+                        <input type="number" class="form-control" id="editSeries" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="editRepeticiones">Repeticiones:</label>
+                        <input type="number" class="form-control" id="editRepeticiones" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="editImagen">Selecciona una imagen:</label>
+                        <input type="file" class="form-control" id="editImagen" accept="image/*">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveEditedExercise()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRutinaIndex = null;
+        let currentEjercicioIndex = null;
+        let currentEjercicioData = null;
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        function closeModal() {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+
+        function editEjercicio(rutinaIndex, ejercicioIndex) {
+            // Guardar los índices
+            currentRutinaIndex = rutinaIndex;
+            currentEjercicioIndex = ejercicioIndex;
+            
+            // Obtener los datos actuales del ejercicio
+            fetch(`/api/rutinas/${rutinaIndex}`)
+                .then(response => response.json())
+                .then(rutinaData => {
+                    currentEjercicioData = rutinaData.ejercicios[ejercicioIndex];
+                    
+                    // Mostrar el modal
+                    const modal = document.getElementById('editExerciseModal');
+                    modal.style.display = 'block';
+                    
+                    // Actualizar el título
+                    const modalTitle = modal.querySelector('.modal-title');
+                    modalTitle.textContent = `Editar Ejercicio: ${currentEjercicioData.nombre}`;
+                    
+                    // Poblar los campos
+                    document.getElementById('editNombre').value = currentEjercicioData.nombre;
+                    document.getElementById('editSeries').value = currentEjercicioData.series;
+                    document.getElementById('editRepeticiones').value = currentEjercicioData.repeticiones;
+                    // No necesitamos cargar la imagen actual ya que es un input file
+                })
+                .catch(error => {
+                    console.error('Error al cargar los datos:', error);
+                    alert('Error al cargar los datos del ejercicio');
+                });
+        }
+
+        function saveEditedExercise() {
+            // Verificar que tengamos los índices necesarios
+            if (currentRutinaIndex === null || currentEjercicioIndex === null) {
+                alert('Error: No se seleccionó un ejercicio');
+                return;
+            }
+
+            // Obtener los valores del formulario
+            // Crear FormData para enviar los datos
+            const formData = new FormData();
+            
+            // Agregar los datos del formulario
+            formData.append('nombre', document.getElementById('editNombre').value.trim());
+            formData.append('series', document.getElementById('editSeries').value);
+            formData.append('repeticiones', document.getElementById('editRepeticiones').value);
+            formData.append('variantes', '[]');
+            
+            // Agregar la imagen si se seleccionó una nueva
+            const imagen = document.getElementById('editImagen').files[0];
+            if (imagen) {
+                formData.append('imagen', imagen);
+            } else {
+                formData.append('imagen', currentEjercicioData.imagen);
+            }
+
+            // Validar campos
+            const nombre = formData.get('nombre');
+            const series = parseInt(formData.get('series'));
+            
+            if (!nombre) {
+                alert('Por favor ingresa un nombre para el ejercicio');
+                return;
+            }
+
+            if (series < 1) {
+                alert('El número de series debe ser mayor a 0');
+                return;
+            }
+
+            // Actualizar el ejercicio
+            fetch(`/api/rutinas/${currentRutinaIndex}/ejercicios/${currentEjercicioIndex}`, {
+                method: 'PUT',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    closeModal();
+                    loadRutinas();
+                    alert('Ejercicio actualizado exitosamente');
+                } else {
+                    alert('Error al actualizar el ejercicio');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar el ejercicio');
+            });
+        }
+
+        function openAddExerciseModal(rutinaIndex) {
+            currentRutinaIndex = rutinaIndex;
+            const modal = document.getElementById('addExerciseModal');
+            modal.style.display = 'block';
+            const form = document.getElementById('addExerciseForm');
+            form.reset();
+            
+            // Mostrar el nombre del músculo en el modal
+            const modalTitle = modal.querySelector('.modal-title');
+            modalTitle.textContent = `Agregar Ejercicio a ${rutina.musculo}`;
+        }
+
+        function saveExercise() {
+            // Verificar que tengamos el índice de la rutina
+            if (currentRutinaIndex === null) {
+                alert('Error: No se seleccionó una rutina');
+                return;
+            }
+
+            // Crear FormData para enviar los datos
+            const formData = new FormData();
+            
+            // Agregar los datos del formulario
+            formData.append('nombre', document.getElementById('ejercicio-nombre').value.trim());
+            formData.append('series', document.getElementById('ejercicio-series').value);
+            formData.append('repeticiones', document.getElementById('ejercicio-repeticiones').value);
+            formData.append('variantes', '[]');
+            
+            // Agregar la imagen si se seleccionó una
+            const imagen = document.getElementById('ejercicio-imagen').files[0];
+            if (imagen) {
+                formData.append('imagen', imagen);
+            }
+
+            // Validar campos
+            const nombre = formData.get('nombre');
+            const series = parseInt(formData.get('series'));
+            
+            if (!nombre) {
+                alert('Por favor ingresa un nombre para el ejercicio');
+                return;
+            }
+
+            if (series < 1) {
+                alert('El número de series debe ser mayor a 0');
+                return;
+            }
+
+            // Agregar el ejercicio
+            fetch(`/api/rutinas/${currentRutinaIndex}/ejercicios`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    closeModal();
+                    loadRutinas();
+                    alert('Ejercicio agregado exitosamente');
+                } else {
+                    alert('Error al agregar el ejercicio');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al agregar el ejercicio');
+                alert('Error al guardar el ejercicio');
+            });
+        }
+
+
+
+        function deleteEjercicio(rutinaIndex, ejercicioIndex) {
+            if (confirm('¿Estás seguro de que deseas eliminar este ejercicio?')) {
+                fetch(`/api/rutinas/${rutinaIndex}/ejercicios/${ejercicioIndex}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadRutinas();
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        // Cargar rutinas al inicio
+        document.addEventListener('DOMContentLoaded', loadRutinas);
+
+        function loadRutinas() {
+            fetch('/api/rutinas')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('rutinas-container');
+                    container.innerHTML = '';
+                    data.rutinas_por_musculo.forEach((rutina, index) => {
+                        container.innerHTML += createRutinaCard(rutina, index);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function createRutinaCard(rutina, index) {
+            return `
+                <div class="card">
+                    <div class="card-image" style="background-image: url('/static/images/muscles/${rutina.musculo.toLowerCase().replace(/\s+/g, '_')}.jpg')"></div>
+                    <div class="card-overlay">
+                        <div class="card-header">
+                            <div class="header-actions">
+                                <h5 class="card-title">${rutina.musculo}</h5>
+                                <button class="btn btn-primary btn-action" onclick="openAddExerciseModal(${index})">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Agregar Ejercicio</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="exercises-list">
+                                ${rutina.ejercicios.map((ejercicio, ejIndex) => `
+                                    <div class="exercise-item">
+                                        <div class="exercise-header">
+                                            <h5 class="exercise-title">${ejercicio.nombre}</h5>
+                                            <div class="exercise-actions">
+                                                <button class="btn btn-warning btn-action edit" onclick="editEjercicio(${index}, ${ejIndex})">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                    <span>Editar</span>
+                                                </button>
+                                                <button class="btn btn-danger btn-action delete" onclick="deleteEjercicio(${index}, ${ejIndex})">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                    <span>Eliminar</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="exercise-content">
+                                            <div class="exercise-details">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Series:</span>
+                                                    <span class="detail-value">${ejercicio.series}</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Repeticiones:</span>
+                                                    <span class="detail-value">${ejercicio.repeticiones}</span>
+                                                </div>
+                                                ${ejercicio.imagen ? `
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Imagen:</span>
+                                                    <img src="${ejercicio.imagen.replace('/exercises/', '/newexercises/')}" alt="${ejercicio.nombre}" class="exercise-image">
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openModal(mode, index = null) {
+            currentRutinaIndex = index;
+            const modal = new bootstrap.Modal(document.getElementById('rutinaModal'));
+            modal.show();
+            
+            if (mode === 'edit' && index !== null) {
+                fetch('/api/rutinas')
+                    .then(response => response.json())
+                    .then(data => {
+                        const rutina = data.rutinas_por_musculo[index];
+                        document.getElementById('musculo').value = rutina.musculo;
+                        document.getElementById('ejercicios-container').innerHTML = createEjerciciosForm(rutina.ejercicios);
+                    });
+            } else {
+                document.getElementById('musculo').value = '';
+                document.getElementById('ejercicios-container').innerHTML = '';
+            }
+        }
+
+        function createEjerciciosForm(ejercicios) {
+            return `
+                ${ejercicios.map((ejercicio, index) => `
+                    <div class="ejercicio-form mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Nombre del ejercicio" value="${ejercicio.nombre}" required>
+                            <input type="number" class="form-control" placeholder="Series" value="${ejercicio.series}" required>
+                            <input type="text" class="form-control" placeholder="Repeticiones" value="${ejercicio.repeticiones}" required>
+                            <input type="file" class="form-control" accept="image/*" required>
+                            <button type="button" class="btn btn-danger btn-action delete" onclick="removeEjercicio(this)">
+                                <i class="fas fa-trash"></i>
+                                <span>Eliminar</span>
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function addEjercicio() {
+            const container = document.getElementById('ejercicios-container');
+            container.innerHTML += `
+                <div class="ejercicio-form mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Nombre del ejercicio" required>
+                        <input type="number" class="form-control" placeholder="Series" required>
+                        <input type="text" class="form-control" placeholder="Repeticiones" required>
+                        <input type="file" class="form-control" accept="image/*" required>
+                        <button type="button" class="btn btn-danger btn-action delete" onclick="removeEjercicio(this)">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function removeEjercicio(button) {
+            button.parentElement.parentElement.remove();
+        }
+
+        function saveRutina() {
+            const musculo = document.getElementById('musculo').value;
+            const ejercicioForms = document.querySelectorAll('.ejercicio-form');
+            const ejercicios = Array.from(ejercicioForms).map(form => {
+                const inputs = form.querySelectorAll('input');
+                return {
+                    nombre: inputs[0].value,
+                    series: parseInt(inputs[1].value),
+                    repeticiones: inputs[2].value,
+                    variantes: inputs[3].value.split(',').map(v => v.trim())
+                };
+            });
+
+            const rutina = {
+                musculo,
+                ejercicios
+            };
+
+            if (currentRutinaIndex !== null) {
+                // Actualizar rutina
+                fetch(`/api/rutinas/${currentRutinaIndex}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(rutina)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadRutinas();
+                    bootstrap.Modal.getInstance(document.getElementById('rutinaModal')).hide();
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                // Agregar nueva rutina
+                fetch('/api/rutinas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(rutina)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadRutinas();
+                    bootstrap.Modal.getInstance(document.getElementById('rutinaModal')).hide();
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function deleteRutina(index) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta rutina?')) {
+                fetch(`/api/rutinas/${index}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadRutinas();
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function editRutina(index) {
+            openModal('edit', index);
+        }
+    </script>
+</body>
+</html>

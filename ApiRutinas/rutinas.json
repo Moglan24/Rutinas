@@ -1,0 +1,155 @@
+{
+  "rutinas_por_musculo": [
+    {
+      "musculo": "Pectoral",
+      "ejercicios": [
+        {
+          "nombre": "Press banca plano con barra",
+          "series": 4,
+          "repeticiones": "9",
+          "variantes": "[]",
+          "imagen": "/static/images/uploads/exercises/press_banca_plano.jpg"
+        },
+        {
+          "nombre": "Press inclinado con mancuernas",
+          "series": 3,
+          "repeticiones": "4",
+          "variantes": "[]",
+          "imagen": "/static/images/uploads/exercises/press_inclinado_con_mancuerna.jpg"
+        }
+      ]
+    },
+    {
+      "musculo": "Dorsales",
+      "ejercicios": [
+        {
+          "nombre": "Dominadas pronas",
+          "series": 4,
+          "repeticiones": "6-8",
+          "imagen": "/static/images/uploads/exercises/dominadas_pronas.jpg"
+        },
+        {
+          "nombre": "Remo con barra T",
+          "series": 4,
+          "repeticiones": "8-10",
+          "imagen": "/static/images/uploads/exercises/remo_con_barra_T.jpg"
+        }
+      ]
+    },
+    {
+      "musculo": "Deltoides",
+      "ejercicios": [
+        {
+          "nombre": "Press militar de pie",
+          "series": 4,
+          "repeticiones": "6-8",
+          "imagen": "/static/images/uploads/exercises/press_militar_de_pie.jpg"
+        },
+        {
+          "nombre": "Elevaciones laterales con mancuernas",
+          "series": 8,
+          "repeticiones": "20",
+          "variantes": "[]",
+          "imagen": "/static/images/uploads/exercises/elevaciones_laterales_con_mancuerna.jpg"
+        },
+        {
+          "nombre": "levantaciones laterales",
+          "series": 3,
+          "repeticiones": 12,
+          "imagen": "/static/images/uploads/exercises/levantaciones_laterales.jpg"
+        }
+      ]
+    },
+    {
+      "musculo": "Biceps",
+      "ejercicios": [
+        {
+          "nombre": "Curl de bíceps con barra recta",
+          "series": 4,
+          "repeticiones": "8-10",
+          "imagen": "/static/images/uploads/exercises/curl_de_biceps_con_barra_recta.jpg"
+        },
+        {
+          "nombre": "Curl martillo",
+          "series": 3,
+          "repeticiones": "10-12",
+          "imagen": "/static/images/uploads/exercises/curl_martillo.jpg"
+        }
+      ]
+    },
+    {
+      "musculo": "Triceps",
+      "ejercicios": [
+        {
+          "nombre": "Fondos en paralelas",
+          "series": 3,
+          "repeticiones": "8-10",
+          "imagen": "/static/images/uploads/exercises/fondos_en_paralelas.jpg"
+        },
+        {
+          "nombre": "Press francés con barra EZ",
+          "series": 4,
+          "repeticiones": "10-12",
+          "imagen": "/static/images/uploads/exercises/press_frances_con_barra_EZ.jpg"
+        }
+      ]
+    },
+    {
+      "musculo": "Femoral",
+      "ejercicios": [
+        {
+          "nombre": "Sentadillas con barra",
+          "series": 4,
+          "repeticiones": "8-10",
+          "imagen": "/static/images/uploads/exercises/sentadillas.jpg"
+        }
+      ]
+    },
+    {
+      "musculo": "Gluteos",
+      "ejercicios": [
+        {
+          "nombre": "Hip thrust con barra",
+          "series": 4,
+          "repeticiones": "10-12",
+          "imagen": "/static/images/uploads/exercises/hip_thrust_con_barra.jpg"
+        },
+        {
+          "nombre": "Patada de glúteo en polea",
+          "series": 3,
+          "repeticiones": "12-15 por pierna",
+          "imagen": "/static/images/uploads/exercises/patada_gluteo.jpg"
+        },
+        {
+          "nombre": "puentes",
+          "series": 4,
+          "repeticiones": "15",
+          "imagen": "/static/images/uploads/newexercises/puentes.jpg"
+        }
+      ]
+    },
+    {
+      "musculo": "Abdominales",
+      "ejercicios": [
+        {
+          "nombre": "Rueda abdominal",
+          "series": 3,
+          "repeticiones": "3",
+          "imagen": "/static/images/uploads/exercises/rueda_abdominal.jpg"
+        },
+        {
+          "nombre": "abs",
+          "series": 4,
+          "repeticiones": "6",
+          "imagen": "/uploads/exercises/abs.jpg"
+        },
+        {
+          "nombre": "crunch",
+          "series": 4,
+          "repeticiones": "12",
+          "imagen": "/uploads/exercises/abs.jpg"
+        }
+      ]
+    }
+  ]
+}
